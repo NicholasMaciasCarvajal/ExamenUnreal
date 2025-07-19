@@ -48,6 +48,9 @@ class AExamenCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* AttackAction;
 
+	UPROPERTY(EditAnywhere)
+	UAnimMontage* Montage;
+
 public:
 	AExamenCharacter();
 	
@@ -61,6 +64,12 @@ protected:
 	void Look(const FInputActionValue& Value);
 
 	void Attack(const FInputActionValue& Value);
+
+	void PlayMontaje(class USkeletalMeshComponent* InSkeletalMeshComponent,
+		class UAnimMontage* MontageToPlay,
+		float PlayRate,
+		float StartingPosition,
+		FName StartingSection);
 			
 
 protected:
@@ -75,4 +84,3 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 };
-

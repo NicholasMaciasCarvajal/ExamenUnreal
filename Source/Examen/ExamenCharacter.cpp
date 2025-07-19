@@ -133,5 +133,48 @@ void AExamenCharacter::Look(const FInputActionValue& Value)
 void AExamenCharacter::Attack(const FInputActionValue& Value) {
 	bool BotonPressed = Value.Get<bool>();
 
+	if (Controller != nullptr) {
 
+	}
+}
+
+void AExamenCharacter::PlayMontaje(USkeletalMeshComponent* InSkeletalMeshComponent, UAnimMontage* MontageToPlay, float PlayRate, float StartingPosition, FName StartingSection)
+{
+	bool bPlayedSuccessfully = false;
+	if (InSkeletalMeshComponent)
+	{
+		if (UAnimInstance* AnimInstance = InSkeletalMeshComponent->GetAnimInstance())
+		{
+			const float MontageLength = AnimInstance->Montage_Play(MontageToPlay, PlayRate, EMontagePlayReturnType::MontageLength, StartingPosition);
+			bPlayedSuccessfully = (MontageLength > 0.f);
+
+			if (bPlayedSuccessfully)
+			{
+				UAnimInstance* AnimInstancePtr = AnimInstance;
+				if (FAnimMontageInstance* MontageInstance = AnimInstance->GetActiveInstanceForMontage(MontageToPlay))
+				{
+					FAnimMontageInstance* MontageInstanceID = MontageInstance->GetInstanceID();
+				}
+
+				if (StartingSection != NAME_None)
+				{
+					AnimInstance->Montage_JumpToSection(StartingSection, MontageToPlay);
+				}
+
+				BlendingOutDelegate.BindUObject(this, &UPlayMontageCallbackProxy::OnMontageBlendingOut);
+				AnimInstance->Montage_SetBlendingOutDelegate(BlendingOutDelegate, MontageToPlay);
+
+				MontageEndedDelegate.BindUObject(this, &UPlayMontageCallbackProxy::OnMontageEnded);
+				AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, MontageToPlay);
+
+				AnimInstance->OnPlayMontageNotifyBegin.AddDynamic(this, &UPlayMontageCallbackProxy::OnNotifyBeginReceived);
+				AnimInstance->OnPlayMontageNotifyEnd.AddDynamic(this, &UPlayMontageCallbackProxy::OnNotifyEndReceived);
+			}
+		}
+	}
+
+	if (!bPlayedSuccessfully)
+	{
+		//OnInterrupted.Broadcast(NAME_None);
+	}
 }
